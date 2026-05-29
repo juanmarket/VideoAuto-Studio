@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family={{FUENTE_PRINCIPAL}}:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: {{BODY_BG}};
+  display: flex; align-items: center; justify-content: center;
+  font-family: '{{FUENTE_PRINCIPAL}}', sans-serif;
+}
+.container {
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: 0 12%;
+  position: relative; z-index: 1;
+}
+.title {
+  font-size: {{TAMANO_TITULO}}px; font-weight: 800;
+  color: {{COLOR_ACENTO1}}; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 32px;
+  opacity: 0; {{TEXT_GRADIENT_CSS}}
+}
+.item {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 20px; opacity: 0;
+}
+.bullet {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: {{COLOR_ACENTO1}}; flex-shrink: 0;
+}
+.item-text {
+  font-size: {{TAMANO_TEXTO}}px; font-weight: 600;
+  color: {{COLOR_TEXTO}}; line-height: 1.4;
+  padding: 8px 16px; border-radius: 8px;
+  background: rgba(91, 76, 245, 0.08);
+}
+</style>
+</head>
+<body>
+{{BG_HTML}}
+<div class="container" style="{{CONTENT_CARD_STYLE}}">
+  <div class="title" id="title">{{TITULO}}</div>
+  <div id="items"></div>
+</div>
+{{ANIM_SCRIPT}}
+<script>
+const rawItems = '{{ITEMS}}';
+const itemList = rawItems.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 6);
+
+const titleEl = document.getElementById('title');
+if (!titleEl.textContent.trim()) {
+  titleEl.style.display = 'none';
+}
+
+const container = document.getElementById('items');
+itemList.forEach(text => {
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.innerHTML = '<div class="bullet"></div><div class="item-text">' + text + '</div>';
+  container.appendChild(div);
+});
+
+const accentColor = '{{COLOR_ACENTO1}}';
+document.querySelectorAll('.item-text').forEach(el => {
+  el.style.background = accentColor + '14';
+});
+
+const tl = gsap.timeline();
+var baseDelay = 0;
+if (titleEl.style.display !== 'none') {
+  animateEntry(tl, '#title', 0);
+  baseDelay = 0.3;
+}
+
+// List items use profile entrance with stagger
+var items = document.querySelectorAll('.item');
+items.forEach(function(el, i) {
+  animateEntry(tl, el, baseDelay + i * 0.25);
+});
+</script>
+</body>
+</html>

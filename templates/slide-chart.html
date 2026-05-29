@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family={{FUENTE_PRINCIPAL}}:wght@400;600;700;800&family={{FUENTE_DATOS}}:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: {{BODY_BG}};
+  display: flex; align-items: center; justify-content: center;
+  font-family: '{{FUENTE_PRINCIPAL}}', sans-serif;
+}
+.container {
+  display: flex; flex-direction: column; align-items: center;
+  width: 80%; height: 80%;
+  position: relative; z-index: 1;
+}
+.title {
+  font-size: {{TAMANO_TITULO}}px; font-weight: 800;
+  color: {{COLOR_TEXTO}}; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 40px;
+  opacity: 0; {{TEXT_GRADIENT_CSS}}
+}
+.chart {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 24px; flex: 1; width: 100%; padding-bottom: 60px;
+  position: relative;
+}
+.bar-group {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; opacity: 0;
+}
+.bar-value {
+  font-family: '{{FUENTE_DATOS}}', monospace;
+  font-size: 28px; font-weight: 800;
+  color: {{COLOR_ACENTO1}};
+}
+.bar {
+  width: 80px; border-radius: 6px 6px 0 0;
+  background: {{COLOR_ACENTO2}};
+  height: 0;
+}
+.bar.top { background: {{COLOR_ACENTO1}}; }
+.bar-label {
+  font-size: 18px; font-weight: 600;
+  color: {{COLOR_TEXTO}}; text-align: center;
+  max-width: 120px; word-wrap: break-word;
+}
+</style>
+</head>
+<body>
+{{BG_HTML}}
+<div class="container" style="{{CONTENT_CARD_STYLE}}">
+  <div class="title" id="title">{{TITULO}}</div>
+  <div class="chart" id="chart"></div>
+</div>
+{{ANIM_SCRIPT}}
+<script>
+const rawData = '{{CHART_DATA}}';
+const lines = rawData.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 5);
+const bars = lines.map(line => {
+  const parts = line.split(':');
+  return { label: (parts[0] || '').trim(), value: parseFloat(parts[1]) || 0 };
+}).filter(b => b.label);
+
+if (bars.length === 0) bars.push({ label: 'Dato', value: 100 });
+
+const maxVal = Math.max(...bars.map(b => b.value));
+const maxBarHeight = 300;
+
+const chart = document.getElementById('chart');
+bars.forEach((b, i) => {
+  const group = document.createElement('div');
+  group.className = 'bar-group';
+
+  const value = document.createElement('div');
+  value.className = 'bar-value';
+  value.textContent = '0';
+  value.dataset.target = b.value;
+
+  const bar = document.createElement('div');
+  bar.className = 'bar' + (b.value === maxVal ? ' top' : '');
+  bar.style.height = '0px';
+  bar.dataset.targetH = Math.round((b.value / maxVal) * maxBarHeight);
+
+  const label = document.createElement('div');
+  label.className = 'bar-label';
+  label.textContent = b.label;
+
+  group.appendChild(value);
+  group.appendChild(bar);
+  group.appendChild(label);
+  chart.appendChild(group);
+});
+
+const titleEl = document.getElementById('title');
+if (!titleEl.textContent.trim()) titleEl.style.display = 'none';
+
+const tl = gsap.timeline();
+if (titleEl.style.display !== 'none') {
+  animateEntry(tl, '#title', 0);
+}
+
+// Bar groups: specialized animation (bar growth + counter)
+const groups = document.querySelectorAll('.bar-group');
+groups.forEach((g, i) => {
+  const bar = g.querySelector('.bar');
+  const val = g.querySelector('.bar-value');
+  const targetH = parseInt(bar.dataset.targetH);
+  const targetV = parseFloat(val.dataset.target);
+  const isInt = Number.isInteger(targetV);
+  const counter = { v: 0 };
+
+  const delay = 0.3 + i * 0.25;
+  tl.to(g, { opacity: 1, duration: 0.3, ease: 'power2.out' }, delay);
+  tl.to(bar, { height: targetH, duration: 0.8, ease: 'power2.out' }, delay);
+  tl.to(counter, {
+    v: targetV,
+    duration: 0.8,
+    ease: 'power2.out',
+    snap: isInt ? { v: 1 } : {},
+    onUpdate: function() {
+      val.textContent = isInt ? Math.round(counter.v).toLocaleString('es-ES') : counter.v.toFixed(1);
+    }
+  }, delay);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family={{FUENTE_PRINCIPAL}}:wght@400;600;700;800&family={{FUENTE_DATOS}}:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: {{BODY_BG}};
+  display: flex; align-items: center; justify-content: center;
+  font-family: '{{FUENTE_PRINCIPAL}}', sans-serif;
+}
+.container {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; width: 70%; max-width: 1200px;
+  padding: 48px 64px;
+  position: relative; z-index: 1;
+}
+.icon { margin-bottom: 20px; opacity: 0; }
+.icon-bg {
+  position: absolute; display: flex; align-items: center; justify-content: center;
+  inset: 0; pointer-events: none; z-index: 0;
+}
+.dato {
+  font-family: '{{FUENTE_DATOS}}', monospace;
+  font-size: {{TAMANO_DATO}}px; font-weight: 800;
+  color: {{COLOR_ACENTO1}}; letter-spacing: -2px;
+  line-height: 1; {{TEXT_GRADIENT_CSS}}
+}
+.line-top {
+  width: 60px; height: 3px; border-radius: 2px;
+  background: {{COLOR_ACENTO2}}; margin: 16px 0;
+  transform: scaleX(0);
+}
+.desc {
+  font-size: {{TAMANO_TEXTO}}px; font-weight: 600;
+  color: {{COLOR_TEXTO}}; opacity: 0;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+{{BG_HTML}}
+<div class="container" style="{{CONTENT_CARD_STYLE}}">
+  <div class="icon" id="icon"></div>
+  <div class="dato" id="dato"></div>
+  <div class="line-top" id="line"></div>
+  <div class="desc" id="desc">{{DESCRIPCION}}</div>
+</div>
+{{ANIM_SCRIPT}}
+<script>
+const iconName = '{{ICONO}}';
+const iconColor = '{{ICONO_COLOR}}';
+const iconSize = {{ICONO_TAMANO}} || 48;
+const iconOpac = {{ICONO_OPACIDAD}};
+const iconPos = '{{ICONO_POSICION}}';
+if (iconName) {
+  const iconEl = document.getElementById('icon');
+  if (iconPos === 'fondo') {
+    iconEl.className = 'icon-bg';
+    iconEl.style.opacity = iconOpac;
+    iconEl.innerHTML = '<i class="ti ti-' + iconName + '" style="font-size:' + Math.round(iconSize * 2.5) + 'px;color:' + iconColor + '"></i>';
+  } else {
+    iconEl.style.opacity = iconOpac;
+    iconEl.innerHTML = '<i class="ti ti-' + iconName + '" style="font-size:' + iconSize + 'px;color:' + iconColor + '"></i>';
+  }
+}
+
+// Parse target value for counter
+const rawDato = '{{DATO}}';
+const numericStr = rawDato.replace(/[^0-9.\-]/g, '');
+const targetNum = parseFloat(numericStr);
+const hasNumber = !isNaN(targetNum) && numericStr.length > 0;
+const isInteger = hasNumber && Number.isInteger(targetNum);
+const hasCommas = rawDato.includes(',') || rawDato.includes('.');
+const prefix = hasNumber ? (rawDato.match(/^[^0-9\-]*/)?.[0] || '') : '';
+const suffix = hasNumber ? (rawDato.match(/[^0-9]*$/)?.[0] || '') : '';
+
+function formatNum(n) {
+  const val = isInteger ? Math.round(n) : n.toFixed(1);
+  if (hasCommas) return Number(val).toLocaleString('es-ES');
+  return String(val);
+}
+
+const datoEl = document.getElementById('dato');
+const tl = gsap.timeline();
+
+if (iconName) {
+  animateIcon(tl, '#icon', 0);
+}
+
+if (hasNumber) {
+  // Counter animation for numeric data
+  datoEl.textContent = prefix + '0' + suffix;
+  const counter = { val: 0 };
+  tl.to(counter, {
+    val: targetNum,
+    duration: 1.2,
+    ease: 'power2.out',
+    snap: isInteger ? { val: 1 } : {},
+    onUpdate: function() {
+      datoEl.textContent = prefix + formatNum(counter.val) + suffix;
+    }
+  }, 0.1);
+} else {
+  // Text-only dato — no counter, just animate in
+  datoEl.textContent = rawDato;
+  datoEl.style.opacity = '0';
+  tl.to(datoEl, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.1);
+}
+
+tl.to('#line', { scaleX: 1, duration: 0.4, ease: 'power2.out' }, 0.8);
+animateEntry(tl, '#desc', 0.8);
+</script>
+</body>
+</html>

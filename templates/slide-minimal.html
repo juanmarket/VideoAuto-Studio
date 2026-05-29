@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family={{FUENTE_PRINCIPAL}}:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: {{BODY_BG}};
+  display: flex; align-items: center; justify-content: center;
+  font-family: '{{FUENTE_PRINCIPAL}}', sans-serif;
+}
+.container {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; width: 70%; max-width: 1200px;
+  padding: 48px 64px;
+  position: relative; z-index: 1;
+}
+.icon { margin-bottom: 24px; opacity: 0; }
+.icon-bg {
+  position: absolute; display: flex; align-items: center; justify-content: center;
+  inset: 0; pointer-events: none; z-index: 0;
+}
+.text {
+  font-size: {{TAMANO_TEXTO}}px; font-weight: 700;
+  color: {{COLOR_TEXTO}}; line-height: 1.3;
+  opacity: 0; {{TEXT_GRADIENT_CSS}}
+}
+.line {
+  width: 80px; height: 4px; border-radius: 2px;
+  background: {{COLOR_ACENTO2}}; margin-top: 20px;
+  transform: scaleX(0);
+}
+</style>
+</head>
+<body>
+{{BG_HTML}}
+<div class="container" style="{{CONTENT_CARD_STYLE}}">
+  <div class="icon" id="icon"></div>
+  <div class="text" id="text">{{TEXTO}}</div>
+  <div class="line" id="line"></div>
+</div>
+{{ANIM_SCRIPT}}
+<script>
+const iconName = '{{ICONO}}';
+const iconColor = '{{ICONO_COLOR}}';
+const iconSize = {{ICONO_TAMANO}} || 48;
+const iconOpac = {{ICONO_OPACIDAD}};
+const iconPos = '{{ICONO_POSICION}}';
+if (iconName) {
+  const iconEl = document.getElementById('icon');
+  if (iconPos === 'fondo') {
+    iconEl.className = 'icon-bg';
+    iconEl.style.opacity = iconOpac;
+    iconEl.innerHTML = '<i class="ti ti-' + iconName + '" style="font-size:' + Math.round(iconSize * 2.5) + 'px;color:' + iconColor + '"></i>';
+  } else {
+    iconEl.style.opacity = iconOpac;
+    iconEl.innerHTML = '<i class="ti ti-' + iconName + '" style="font-size:' + iconSize + 'px;color:' + iconColor + '"></i>';
+  }
+}
+
+const tl = gsap.timeline();
+if (iconName) {
+  animateIcon(tl, '#icon', 0);
+}
+animateEntry(tl, '#text', iconName ? 0.2 : 0);
+tl.to('#line', { scaleX: 1, duration: 0.4, ease: 'power2.out' }, 0.4);
+</script>
+</body>
+</html>

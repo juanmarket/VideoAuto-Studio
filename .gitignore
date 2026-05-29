@@ -1,0 +1,11 @@
+.env
+output/tmp_*/
+output/*.mp4
+output/*.txt
+output/*.json
+uploads/audio/
+uploads/images/
+*.m4a
+*.MP3
+*.wav
+node_modules/
